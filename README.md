@@ -15,6 +15,7 @@
 
 ### Enumerate all domains in current forest
 - `nltest /domain_trusts` (This command returns domains in the current forest and the associated trusts)
+
 </details>
 
 
