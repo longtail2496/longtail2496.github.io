@@ -1,9 +1,6 @@
 
 ## Active Directory Security Testing
 
-<details>
-    <summary>Active Directory Enumeration</summary><p>
-
 ### Get Current Domain
 - `$env:USERDOMAIN` (This command will return NETBIOS name  of the domain)
 
@@ -15,7 +12,4 @@
 
 ### Enumerate all domains in current forest
 - `nltest /domain_trusts` (This command returns domains in the current forest and the associated trusts)
-
-</p></details>
-
 
