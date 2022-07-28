@@ -20,6 +20,8 @@ This section focuses on what to enumerate from an active directory environment. 
 
 ### Enumerate domain trust relationships
 - `nltest /domain_trusts` (Native Windows command available on Windows server editions)
+- `Get-DomainTrust` (Powerview), optional switch `-Domain` to specify a domain
+- `Get-ADTrust` (AD Module), optional switch `-Identity` to specify a domain
 
 ### Domain Policy Enumeration
 - `Get-DomainPolicyData` (PowerView) , This command will return domain policies such as Domain Password Policies and Kerberos Policies, which is needed to forge kerberos policy compliant golden\silver tickets, which is unlikely to stand out as anomalous iin event logs.
@@ -50,3 +52,48 @@ This section focuses on what to enumerate from an active directory environment. 
 - `Get-DomainComputer` (PowerView) , the `-Ping` switch only lists active computers 
 - `Get-ADComputer -Filter * -Properties DNSHostName | %{Test-Connection -Count 1 -ComputerName $_.DNSHostName}` (AD Module), The piped command functions same as ping, which only lists active computers
 > **Note:** (A computer object may not necessarily be an actual computer. A domain user has the default right to create/join upto 10 computer object, and yes you are correct, fake computer objects can be created and this is what we will do in AD CS exploitation for privilege escalation\Persistance)
+
+### Enumerate Local Groups
+- `Get-NetLocalGroup -ComputerName <Computer> ListGroups` (PowerView, needs Administrator privileges on non-dc machines, `-Recurse` is optional parameter)
+- `Get-NetLocalGroupMember -ComputerName <Computer> -GroupName <Group Name>` (PowerView, needs Administrator privileges on non-dc machines)
+
+### Enumerate Logged-on Users
+- `qwinsta /server:<Computer Name>` (Natively available on Windows)
+- `Get-NetLoggedon  -ComputerName <Computer Name>` (Powerview, to list actively logged on a computer, needs local administrator privilege)
+- `Get-LoggedonLocal -ComputerName <Computer Name>` (Powerview, get locally logged on users on a system, needs remote registry)
+
+### Enumerate Network File Shares
+- `Invoke-ShareFinder -Verbose` (Powerview), Enumerate shares on hosts in current domain
+- `Invoke-FileFinder -Verbose` (Powerview), Enumerate sensitive files on computers on domain
+- `Get-NetFileServer` (Powerview), List all File-Servers in the domain
+
+### Enumerate Group Policies
+>**Note:** Only GPO names can be retrieved using PowerView, not the associated settings. Only locally applicable GPO can be found using rsop.msc or gpedit.msc
+- `Get-DomainGPO` (Powerview), optional parameter `-ComputerIdentity` allows selecting a computer
+- `Get-DomainGPOLocalGroup` (Powerview), Enumerate GPOs that are applicable on Restricted Groups)
+- `Get-DomainGPOComputerLocalGroupMapping` (Powerview), The command has two optional parameters -Identity <User> or -ComputerIdentity <Computer>, with either of the switches selected, a user's or a computer's local group membership using a GPO can be enumerated
+
+### Enumerate Organizational Units
+>**Note:** GPOs are applied on Organizational Units
+- `Get-DomainOU` (PowerView)
+- `Get-DomainGPO -Identity <OU GUID>` (Powerview), Enumerates GPO and OU mapping with OU identity specified by OU's GUID retrieved from OU's gplink attribute
+- `Get-ADOrganizationalUnit -Filter * -Properties *` (AD Module)
+
+### Enumerate ACLs
+>**Note:** All "Authenticated Users" can read ACLs unless it is explicitly blocked, Findings of Over-Permissive ACLs for a user by Enumerating group membership of a user, ACLs may not directly include a username for permission most of the time, however, ACLs may be present for an object which has GenericAll or Write permission for a group user is in.
+- `Find-InterestingDomainAcl -ResolveGUIDs` (Powerview), to enumerate interesting ACLs in the domain
+- `Get-DomainObjectAcl -SamAccountName <account name> -ResolveGUIDs -Verbose` (Powerview), optional switch `-SearchBase` allows specifying filtering criteria using LDAP syntax
+- `Get-Acl
+'AD:\CN=Administrator,CN Users,DC dollarcorp,DC moneycorp,DC=local'` (AD Module)
+
+### Enumerate Forest Mapping
+- Get details about current forest
+    - `Get-Forest` (Powerview), optional parameter `-Forest` allows specifying forest.
+    - `Get-ADForest` (AD Module), optional parameter `-Identity` allows specifying forest.
+- Get all domains in the current forest
+    - `Get-ForestDomain` (Powerview), optional parameter  `-Forest` allows specifying forest.
+    - `(Get-ADForest).Domains` (AD Module)
+- Get forest trust mapping
+    - `Get-ForestTrust` (Powerview), optional parameter  `-Forest` allows specifying forest.
+    - `Get-ADTrust -Filter 'msDS-TrustForestTrustInfo -ne
+"$null"'` (AD Module)
