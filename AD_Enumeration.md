@@ -97,3 +97,5 @@ This section focuses on what to enumerate from an active directory environment. 
     - `Get-ForestTrust` (Powerview), optional parameter  `-Forest` allows specifying forest.
     - `Get-ADTrust -Filter 'msDS-TrustForestTrustInfo -ne
 "$null"'` (AD Module)
+
+## Hunting for user privileges (Pre-PrivEsc)
