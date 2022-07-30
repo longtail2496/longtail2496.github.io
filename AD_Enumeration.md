@@ -99,3 +99,4 @@ This section focuses on what to enumerate from an active directory environment. 
 "$null"'` (AD Module)
 
 ## Hunting for user privileges (Pre-PrivEsc)
+- `Find-DomainUserLocation` (check lab manual for syntax)
