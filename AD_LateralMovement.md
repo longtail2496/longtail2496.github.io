@@ -32,3 +32,7 @@
 - `netsh interface portproxy add v4tov4 listenport=<Local Port> listenaddress=0.0.0.0 connectport=<Remote Port> connectaddress=<Remote Address>` (This command will setup the port forwarding. A listener listens on local port 8080, and any connection to `127.0.0.1:8080` will be ridirected to `<Remote Address>:<Remote Port>`)
 
 - `wget http://127.0.0.1:<Local Port>/file.ext` (Post port-forwarding setup, files can be download by any means desired, this example shows wget to download a file named `file.ext`)
+
+### Access Resources from different forest
+
+Resources specificially shared from another forest can be accessed. The privileges can not be escalated as Administrator because of Trust Attributes are set to `FILTER_SIDS` which is default for cross-forests trust. If we want to [inject sIDHistory](AD_PrivEsc.md#sidhistory-injection) of Administrator, we cannot do so because *System SIDs* gets filtered a forest level.
