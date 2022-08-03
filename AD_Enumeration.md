@@ -100,3 +100,6 @@ This section focuses on what to enumerate from an active directory environment. 
 
 ## Hunting for user privileges (Pre-PrivEsc)
 - `Find-DomainUserLocation` (check lab manual for syntax)
+
+## SQL Server Enumeration
+- [SQL Server Enumeration](AD_PrivEsc.md#ms-sql-service-enumeration)
